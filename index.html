@@ -1,0 +1,1360 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arbeitszeiterfassung KFZ</title>
+    <style>
+        :root {
+            --color-primary: #1f8082;
+            --color-primary-hover: #177075;
+            --color-success: #10b981;
+            --color-error: #dc2626;
+            --color-warning: #f59e0b;
+            --color-bg: #f9fafb;
+            --color-surface: #ffffff;
+            --color-text: #1f2937;
+            --color-text-light: #6b7280;
+            --color-border: #e5e7eb;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--color-primary), #0f5961);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            border-bottom: 2px solid var(--color-border);
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            color: var(--color-text-light);
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .tab-btn.active {
+            color: var(--color-primary);
+            border-bottom-color: var(--color-primary);
+        }
+
+        .tab-btn:hover {
+            color: var(--color-primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: var(--color-surface);
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid var(--color-border);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h2 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: var(--color-text);
+            border-bottom: 2px solid var(--color-border);
+            padding-bottom: 10px;
+        }
+
+        .time-display {
+            background: #f3f4f6;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--color-primary);
+        }
+
+        .time-display .label {
+            font-size: 12px;
+            color: var(--color-text-light);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        .time-display .value {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--color-primary);
+            font-family: 'Courier New', monospace;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            flex: 1;
+        }
+
+        button.btn-primary {
+            background-color: var(--color-primary);
+            color: white;
+        }
+
+        button.btn-primary:hover {
+            background-color: var(--color-primary-hover);
+        }
+
+        button.btn-success {
+            background-color: var(--color-success);
+            color: white;
+        }
+
+        button.btn-success:hover {
+            background-color: #059669;
+        }
+
+        button.btn-warning {
+            background-color: var(--color-warning);
+            color: white;
+        }
+
+        button.btn-warning:hover {
+            background-color: #d97706;
+        }
+
+        button.btn-danger {
+            background-color: var(--color-error);
+            color: white;
+        }
+
+        button.btn-danger:hover {
+            background-color: #b91c1c;
+        }
+
+        button.btn-small {
+            padding: 8px 12px;
+            font-size: 12px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: var(--color-text);
+            font-size: 14px;
+        }
+
+        input[type="date"],
+        input[type="time"],
+        input[type="text"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--color-border);
+            border-radius: 6px;
+            font-size: 14px;
+            background: var(--color-surface);
+            color: var(--color-text);
+        }
+
+        input[type="date"]:focus,
+        input[type="time"]:focus,
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(31, 128, 130, 0.1);
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--color-surface);
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--color-border);
+            font-size: 14px;
+        }
+
+        th {
+            background-color: #f3f4f6;
+            font-weight: 600;
+            color: var(--color-text);
+        }
+
+        tr:hover {
+            background-color: #f9fafb;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-active {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: var(--color-success);
+        }
+
+        .status-vacation {
+            background-color: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+        }
+
+        .status-sick {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--color-error);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            border-left: 4px solid var(--color-primary);
+        }
+
+        .stat-box .label {
+            font-size: 12px;
+            color: var(--color-text-light);
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .stat-box .value {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--color-primary);
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid;
+        }
+
+        .alert-success {
+            background-color: rgba(16, 185, 129, 0.1);
+            border-left-color: var(--color-success);
+            color: #065f46;
+        }
+
+        .alert-error {
+            background-color: rgba(239, 68, 68, 0.1);
+            border-left-color: var(--color-error);
+            color: #7f1d1d;
+        }
+
+        .alert-info {
+            background-color: rgba(59, 130, 246, 0.1);
+            border-left-color: #3b82f6;
+            color: #1e3a8a;
+        }
+
+        .month-select {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .month-select select {
+            padding: 10px;
+            border: 1px solid var(--color-border);
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .date-range {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .summary-section {
+            background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .summary-section h3 {
+            margin-bottom: 15px;
+            color: var(--color-text);
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            header h1 {
+                font-size: 20px;
+            }
+
+            .tabs {
+                flex-direction: column;
+            }
+
+            .tab-btn {
+                text-align: left;
+                border-bottom: none;
+                border-left: 3px solid transparent;
+                padding-left: 20px;
+            }
+
+            .tab-btn.active {
+                border-bottom: none;
+                border-left-color: var(--color-primary);
+            }
+
+            table {
+                font-size: 12px;
+            }
+
+            th, td {
+                padding: 8px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .date-range {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⏱️ Arbeitszeiterfassung KFZ</h1>
+            <p>KFZ-Mechatroniker Azubi - Baden-Württemberg 2026</p>
+        </header>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab(event, 'arbeitszeit')">Arbeitszeiten</button>
+            <button class="tab-btn" onclick="switchTab(event, 'pause')">Pausen</button>
+            <button class="tab-btn" onclick="switchTab(event, 'urlaub')">Urlaub</button>
+            <button class="tab-btn" onclick="switchTab(event, 'krankheit')">Krankheit</button>
+            <button class="tab-btn" onclick="switchTab(event, 'ubersicht')">Übersicht</button>
+        </div>
+
+        <!-- ARBEITSZEITEN TAB -->
+        <div id="arbeitszeit" class="tab-content active">
+            <div class="grid">
+                <div class="card">
+                    <h2>📅 Heute: Arbeitszeit</h2>
+                    <div class="time-display">
+                        <div class="label">Heutige Arbeitszeit</div>
+                        <div class="value" id="todayHours">0:00h</div>
+                    </div>
+                    <div class="button-group">
+                        <button class="btn-primary" onclick="startWork()">👔 Arbeit starten</button>
+                        <button class="btn-danger" onclick="endWork()">🚪 Arbeit beenden</button>
+                    </div>
+                    <div id="workStatus" class="alert alert-info" style="display: none;"></div>
+                </div>
+
+                <div class="card">
+                    <h2>Arbeitszeit manuell eintragen</h2>
+                    <div class="form-group">
+                        <label>Datum</label>
+                        <input type="date" id="manualWorkDate" value="2026-01-07">
+                    </div>
+                    <div class="date-range">
+                        <div class="form-group">
+                            <label>Von (Uhrzeit)</label>
+                            <input type="time" id="manualWorkStart">
+                        </div>
+                        <div class="form-group">
+                            <label>Bis (Uhrzeit)</label>
+                            <input type="time" id="manualWorkEnd">
+                        </div>
+                    </div>
+                    <button class="btn-primary" onclick="addManualWorkTime()">Speichern</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Arbeitszeiten-Übersicht</h2>
+                <div class="table-container">
+                    <table id="workTable">
+                        <thead>
+                            <tr>
+                                <th>Datum</th>
+                                <th>Von</th>
+                                <th>Bis</th>
+                                <th>Dauer</th>
+                                <th>Typ</th>
+                                <th>Aktion</th>
+                            </tr>
+                        </thead>
+                        <tbody id="workBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAUSEN TAB -->
+        <div id="pause" class="tab-content">
+            <div class="grid">
+                <div class="card">
+                    <h2>☕ Frühstückspause</h2>
+                    <div class="time-display">
+                        <div class="label">Status</div>
+                        <div class="value" id="breakfastStatus">Nicht gestartet</div>
+                    </div>
+                    <div class="button-group">
+                        <button class="btn-success" onclick="startBreakfast()">🍽️ Start</button>
+                        <button class="btn-danger" onclick="endBreakfast()">✓ Ende</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>🍽️ Mittagspause</h2>
+                    <div class="time-display">
+                        <div class="label">Status</div>
+                        <div class="value" id="lunchStatus">Nicht gestartet</div>
+                    </div>
+                    <div class="button-group">
+                        <button class="btn-success" onclick="startLunch()">🍴 Start</button>
+                        <button class="btn-danger" onclick="endLunch()">✓ Ende</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Pausenzeiten eintragen</h2>
+                <div class="form-group">
+                    <label>Pausentyp</label>
+                    <select id="pauseType">
+                        <option value="breakfast">Frühstückspause</option>
+                        <option value="lunch">Mittagspause</option>
+                        <option value="other">Sonstige Pause</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Datum</label>
+                    <input type="date" id="pauseDate" value="2026-01-07">
+                </div>
+                <div class="date-range">
+                    <div class="form-group">
+                        <label>Von (Uhrzeit)</label>
+                        <input type="time" id="pauseStart">
+                    </div>
+                    <div class="form-group">
+                        <label>Bis (Uhrzeit)</label>
+                        <input type="time" id="pauseEnd">
+                    </div>
+                </div>
+                <button class="btn-primary" onclick="addManualPause()">Speichern</button>
+
+                <div class="table-container">
+                    <table id="pauseTable">
+                        <thead>
+                            <tr>
+                                <th>Datum</th>
+                                <th>Typ</th>
+                                <th>Von</th>
+                                <th>Bis</th>
+                                <th>Dauer</th>
+                                <th>Aktion</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pauseBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- URLAUB TAB -->
+        <div id="urlaub" class="tab-content">
+            <div class="grid">
+                <div class="card">
+                    <h2>🏖️ Urlaub-Übersicht 2026</h2>
+                    <div class="stat-box">
+                        <div class="label">Gesamturlaub</div>
+                        <div class="value" id="totalVacation">31</div>
+                    </div>
+                    <div class="stat-box" style="margin-top: 15px;">
+                        <div class="label">Verbrauchter Urlaub</div>
+                        <div class="value" id="usedVacation">0</div>
+                    </div>
+                    <div class="stat-box" style="margin-top: 15px;">
+                        <div class="label">Restlicher Urlaub</div>
+                        <div class="value" id="remainingVacation">31</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>Urlaub eintragen</h2>
+                    <div class="form-group">
+                        <label>Von (Datum)</label>
+                        <input type="date" id="vacationStart" value="2026-01-08">
+                    </div>
+                    <div class="form-group">
+                        <label>Bis (Datum)</label>
+                        <input type="date" id="vacationEnd" value="2026-01-08">
+                    </div>
+                    <div class="form-group">
+                        <label>Bemerkung (Optional)</label>
+                        <input type="text" id="vacationNote" placeholder="z.B. Urlaub mit Familie">
+                    </div>
+                    <button class="btn-primary" onclick="addVacation()">Urlaub eintragen</button>
+                    <div id="vacationAlert"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Urlaubskalender 2026</h2>
+                <div class="table-container">
+                    <table id="vacationTable">
+                        <thead>
+                            <tr>
+                                <th>Von</th>
+                                <th>Bis</th>
+                                <th>Tage (inkl. Wochenenden)</th>
+                                <th>Arbeitstage</th>
+                                <th>Bemerkung</th>
+                                <th>Aktion</th>
+                            </tr>
+                        </thead>
+                        <tbody id="vacationBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- KRANKHEIT TAB -->
+        <div id="krankheit" class="tab-content">
+            <div class="grid">
+                <div class="card">
+                    <h2>🏥 Krankheitstage 2026</h2>
+                    <div class="stat-box">
+                        <div class="label">Gesamte Krankheitstage</div>
+                        <div class="value" id="totalSickDays">0</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>Krankheit eintragen</h2>
+                    <div class="form-group">
+                        <label>Von (Datum)</label>
+                        <input type="date" id="sickStart" value="2026-01-08">
+                    </div>
+                    <div class="form-group">
+                        <label>Bis (Datum)</label>
+                        <input type="date" id="sickEnd" value="2026-01-08">
+                    </div>
+                    <div class="form-group">
+                        <label>Bemerkung (Optional)</label>
+                        <input type="text" id="sickNote" placeholder="z.B. Erkältung, Zahnarzt">
+                    </div>
+                    <button class="btn-primary" onclick="addSickDay()">Speichern</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Krankheitskalender</h2>
+                <div class="table-container">
+                    <table id="sickTable">
+                        <thead>
+                            <tr>
+                                <th>Von</th>
+                                <th>Bis</th>
+                                <th>Tage</th>
+                                <th>Arbeitstage</th>
+                                <th>Bemerkung</th>
+                                <th>Aktion</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sickBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ÜBERSICHT TAB -->
+        <div id="ubersicht" class="tab-content">
+            <div class="card">
+                <h2>📊 Monatsübersicht 2026</h2>
+                <div class="month-select">
+                    <label>Monat auswählen:</label>
+                    <select id="monthSelect" onchange="updateMonthlyOverview()">
+                        <option value="1">Januar</option>
+                        <option value="2">Februar</option>
+                        <option value="3">März</option>
+                        <option value="4">April</option>
+                        <option value="5">Mai</option>
+                        <option value="6">Juni</option>
+                        <option value="7">Juli</option>
+                        <option value="8">August</option>
+                        <option value="9">September</option>
+                        <option value="10">Oktober</option>
+                        <option value="11">November</option>
+                        <option value="12">Dezember</option>
+                    </select>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="label">Sollstunden (40h/Woche)</div>
+                        <div class="value" id="targetHours">160h</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="label">Geleistete Stunden</div>
+                        <div class="value" id="actualHours">0h</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="label">Überstunden</div>
+                        <div class="value" id="overtimeHours">0h</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="label">Fehlstunden</div>
+                        <div class="value" id="missingHours">0h</div>
+                    </div>
+                </div>
+
+                <div class="table-container" style="margin-top: 30px;">
+                    <table id="monthlyTable">
+                        <thead>
+                            <tr>
+                                <th>Datum</th>
+                                <th>Tag</th>
+                                <th>Arbeitszeit</th>
+                                <th>Urlaub</th>
+                                <th>Krankheit</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="monthlyBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 20px;">
+                <h2>📈 Jahresübersicht 2026</h2>
+                <div class="summary-section">
+                    <h3>Zusammenfassung</h3>
+                    <div class="summary-item">
+                        <span>Gesamt Arbeitstage (Mo-Fr):</span>
+                        <strong id="totalWorkDays">252</strong>
+                    </div>
+                    <div class="summary-item">
+                        <span>Gesamt Soll-Stunden (40h/Woche):</span>
+                        <strong id="totalTargetHours">2016h</strong>
+                    </div>
+                    <div class="summary-item">
+                        <span>Gesamt geleistete Stunden:</span>
+                        <strong id="totalActualHours">0h</strong>
+                    </div>
+                    <div class="summary-item">
+                        <span>Gesamte Überstunden:</span>
+                        <strong id="totalOvertime">0h</strong>
+                    </div>
+                    <div class="summary-item">
+                        <span>Genutzter Urlaub (Arbeitstage):</span>
+                        <strong id="totalUsedVacation">5</strong>
+                    </div>
+                    <div class="summary-item">
+                        <span>Krankheitstage (Arbeitstage):</span>
+                        <strong id="totalSickDaysYear">0</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Feiertage Baden-Württemberg 2026
+        const holidays2026 = [
+            '2026-01-01', // Neujahr
+            '2026-01-06', // Heilige Drei Könige
+            '2026-04-03', // Karfreitag
+            '2026-04-06', // Ostermontag
+            '2026-05-01', // Tag der Arbeit
+            '2026-05-14', // Christi Himmelfahrt
+            '2026-05-25', // Pfingstmontag
+            '2026-06-04', // Fronleichnam
+            '2026-10-03', // Tag der Deutschen Einheit
+            '2026-11-01', // Allerheiligen
+            '2026-12-25', // 1. Weihnachtstag
+            '2026-12-26'  // 2. Weihnachtstag
+        ];
+
+        // Datenstruktur
+        let data = {
+            workEntries: [
+                { date: '2026-01-07', startTime: '07:30', endTime: '15:30', type: 'manual' }
+            ],
+            pauseEntries: [],
+            vacationEntries: [
+                { startDate: '2026-01-01', endDate: '2026-01-06', note: 'Initialer Urlaub', workDays: 4 }
+            ],
+            sickEntries: [],
+            currentWork: null,
+            currentBreakfast: null,
+            currentLunch: null
+        };
+
+        // Hilfsfunktionen
+        function getWeekday(dateStr) {
+            const days = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+            const date = new Date(dateStr + 'T00:00:00');
+            return days[date.getDay()];
+        }
+
+        function isWeekday(dateStr) {
+            const date = new Date(dateStr + 'T00:00:00');
+            const day = date.getDay();
+            return day !== 0 && day !== 6;
+        }
+
+        function isHoliday(dateStr) {
+            return holidays2026.includes(dateStr);
+        }
+
+        function calculateWorkDays(startDate, endDate) {
+            let count = 0;
+            const current = new Date(startDate + 'T00:00:00');
+            const end = new Date(endDate + 'T00:00:00');
+
+            while (current <= end) {
+                if (isWeekday(current.toISOString().split('T')[0]) && !isHoliday(current.toISOString().split('T')[0])) {
+                    count++;
+                }
+                current.setDate(current.getDate() + 1);
+            }
+            return count;
+        }
+
+        function timeToHours(timeStr) {
+            const [hours, minutes] = timeStr.split(':').map(Number);
+            return hours + minutes / 60;
+        }
+
+        function hoursToTime(hours) {
+            const h = Math.floor(hours);
+            const m = Math.round((hours - h) * 60);
+            return `${h}:${m.toString().padStart(2, '0')}h`;
+        }
+
+        function getCurrentTime() {
+            const now = new Date();
+            return now.toISOString().split('T')[0];
+        }
+
+        function getCurrentTimeStr() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            return `${hours}:${minutes}`;
+        }
+
+        // Tab-Wechsel
+        function switchTab(event, tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+
+            if (tabName === 'ubersicht') {
+                updateMonthlyOverview();
+            }
+        }
+
+        // Arbeitszeit Funktionen
+        function startWork() {
+            if (data.currentWork) {
+                alert('Arbeit ist bereits gestartet!');
+                return;
+            }
+
+            const now = new Date();
+            const date = now.toISOString().split('T')[0];
+            const time = getCurrentTimeStr();
+
+            data.currentWork = { date, startTime: time };
+            document.getElementById('workStatus').textContent = `✓ Arbeit gestartet um ${time} Uhr`;
+            document.getElementById('workStatus').style.display = 'block';
+            document.getElementById('workStatus').className = 'alert alert-success';
+        }
+
+        function endWork() {
+            if (!data.currentWork) {
+                alert('Bitte starten Sie erst die Arbeit!');
+                return;
+            }
+
+            const endTime = getCurrentTimeStr();
+            const entry = {
+                date: data.currentWork.date,
+                startTime: data.currentWork.startTime,
+                endTime: endTime,
+                type: 'auto'
+            };
+
+            data.workEntries.push(entry);
+            data.currentWork = null;
+
+            document.getElementById('workStatus').textContent = `✓ Arbeit beendet um ${endTime} Uhr`;
+            document.getElementById('workStatus').className = 'alert alert-success';
+
+            updateWorkDisplay();
+        }
+
+        function addManualWorkTime() {
+            const date = document.getElementById('manualWorkDate').value;
+            const startTime = document.getElementById('manualWorkStart').value;
+            const endTime = document.getElementById('manualWorkEnd').value;
+
+            if (!date || !startTime || !endTime) {
+                alert('Bitte füllen Sie alle Felder aus');
+                return;
+            }
+
+            if (startTime >= endTime) {
+                alert('Die Endzeit muss nach der Startzeit liegen');
+                return;
+            }
+
+            data.workEntries.push({
+                date: date,
+                startTime: startTime,
+                endTime: endTime,
+                type: 'manual'
+            });
+
+            document.getElementById('manualWorkDate').value = getCurrentTime();
+            document.getElementById('manualWorkStart').value = '';
+            document.getElementById('manualWorkEnd').value = '';
+
+            updateWorkDisplay();
+        }
+
+        function updateWorkDisplay() {
+            let todayHours = 0;
+            const today = getCurrentTime();
+            const tbody = document.getElementById('workBody');
+            tbody.innerHTML = '';
+
+            // Sortieren nach Datum
+            const sorted = [...data.workEntries].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            sorted.forEach((entry, index) => {
+                const startHours = timeToHours(entry.startTime);
+                const endHours = timeToHours(entry.endTime);
+                const duration = endHours - startHours;
+
+                if (entry.date === today) {
+                    todayHours += duration;
+                }
+
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${entry.date}</td>
+                    <td>${entry.startTime}</td>
+                    <td>${entry.endTime}</td>
+                    <td>${hoursToTime(duration)}</td>
+                    <td><span class="status-badge status-active">${entry.type === 'auto' ? 'Automatisch' : 'Manuell'}</span></td>
+                    <td><button class="btn-small btn-danger" onclick="deleteWork(${index})">Löschen</button></td>
+                `;
+            });
+
+            document.getElementById('todayHours').textContent = hoursToTime(todayHours);
+        }
+
+        function deleteWork(index) {
+            if (confirm('Arbeitszeit wirklich löschen?')) {
+                data.workEntries.splice(index, 1);
+                updateWorkDisplay();
+            }
+        }
+
+        // Pause Funktionen
+        function startBreakfast() {
+            if (data.currentBreakfast) {
+                alert('Frühstückspause ist bereits aktiv!');
+                return;
+            }
+            data.currentBreakfast = getCurrentTimeStr();
+            document.getElementById('breakfastStatus').textContent = `⏱️ Läuft seit ${data.currentBreakfast}`;
+        }
+
+        function endBreakfast() {
+            if (!data.currentBreakfast) {
+                alert('Frühstückspause wurde nicht gestartet!');
+                return;
+            }
+
+            const endTime = getCurrentTimeStr();
+            data.pauseEntries.push({
+                date: getCurrentTime(),
+                type: 'breakfast',
+                startTime: data.currentBreakfast,
+                endTime: endTime
+            });
+
+            data.currentBreakfast = null;
+            document.getElementById('breakfastStatus').textContent = 'Nicht gestartet';
+            updatePauseDisplay();
+        }
+
+        function startLunch() {
+            if (data.currentLunch) {
+                alert('Mittagspause ist bereits aktiv!');
+                return;
+            }
+            data.currentLunch = getCurrentTimeStr();
+            document.getElementById('lunchStatus').textContent = `⏱️ Läuft seit ${data.currentLunch}`;
+        }
+
+        function endLunch() {
+            if (!data.currentLunch) {
+                alert('Mittagspause wurde nicht gestartet!');
+                return;
+            }
+
+            const endTime = getCurrentTimeStr();
+            data.pauseEntries.push({
+                date: getCurrentTime(),
+                type: 'lunch',
+                startTime: data.currentLunch,
+                endTime: endTime
+            });
+
+            data.currentLunch = null;
+            document.getElementById('lunchStatus').textContent = 'Nicht gestartet';
+            updatePauseDisplay();
+        }
+
+        function addManualPause() {
+            const type = document.getElementById('pauseType').value;
+            const date = document.getElementById('pauseDate').value;
+            const startTime = document.getElementById('pauseStart').value;
+            const endTime = document.getElementById('pauseEnd').value;
+
+            if (!date || !startTime || !endTime) {
+                alert('Bitte füllen Sie alle Felder aus');
+                return;
+            }
+
+            data.pauseEntries.push({
+                date: date,
+                type: type,
+                startTime: startTime,
+                endTime: endTime
+            });
+
+            document.getElementById('pauseStart').value = '';
+            document.getElementById('pauseEnd').value = '';
+            updatePauseDisplay();
+        }
+
+        function updatePauseDisplay() {
+            const tbody = document.getElementById('pauseBody');
+            tbody.innerHTML = '';
+
+            data.pauseEntries.forEach((entry, index) => {
+                const startHours = timeToHours(entry.startTime);
+                const endHours = timeToHours(entry.endTime);
+                const duration = endHours - startHours;
+
+                const typeLabel = {
+                    'breakfast': '☕ Frühstück',
+                    'lunch': '🍽️ Mittagessen',
+                    'other': '⏱️ Sonstige'
+                }[entry.type];
+
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${entry.date}</td>
+                    <td>${typeLabel}</td>
+                    <td>${entry.startTime}</td>
+                    <td>${entry.endTime}</td>
+                    <td>${hoursToTime(duration)}</td>
+                    <td><button class="btn-small btn-danger" onclick="deletePause(${index})">Löschen</button></td>
+                `;
+            });
+        }
+
+        function deletePause(index) {
+            if (confirm('Pause wirklich löschen?')) {
+                data.pauseEntries.splice(index, 1);
+                updatePauseDisplay();
+            }
+        }
+
+        // Urlaub Funktionen
+        function addVacation() {
+            const startDate = document.getElementById('vacationStart').value;
+            const endDate = document.getElementById('vacationEnd').value;
+            const note = document.getElementById('vacationNote').value;
+
+            if (!startDate || !endDate) {
+                alert('Bitte wählen Sie Start- und Enddatum');
+                return;
+            }
+
+            if (new Date(startDate) > new Date(endDate)) {
+                alert('Startdatum muss vor Enddatum liegen');
+                return;
+            }
+
+            const workDays = calculateWorkDays(startDate, endDate);
+            const remainingVacation = 31 - getTotalUsedVacationDays() - workDays;
+
+            if (remainingVacation < 0) {
+                document.getElementById('vacationAlert').innerHTML = `<div class="alert alert-error">❌ Nicht genug Urlaub verbleibend! Sie verbrauchen ${workDays} Tage, haben aber nur ${31 - getTotalUsedVacationDays()} Tage übrig.</div>`;
+                return;
+            }
+
+            data.vacationEntries.push({
+                startDate: startDate,
+                endDate: endDate,
+                note: note || '-',
+                workDays: workDays
+            });
+
+            document.getElementById('vacationAlert').innerHTML = '<div class="alert alert-success">✓ Urlaub erfolgreich eingetragen!</div>';
+            updateVacationDisplay();
+        }
+
+        function getTotalUsedVacationDays() {
+            return data.vacationEntries.reduce((sum, entry) => sum + entry.workDays, 0);
+        }
+
+        function updateVacationDisplay() {
+            const totalVacation = 31;
+            const usedVacation = getTotalUsedVacationDays();
+            const remaining = totalVacation - usedVacation;
+
+            document.getElementById('totalVacation').textContent = totalVacation;
+            document.getElementById('usedVacation').textContent = usedVacation;
+            document.getElementById('remainingVacation').textContent = remaining;
+
+            const tbody = document.getElementById('vacationBody');
+            tbody.innerHTML = '';
+
+            data.vacationEntries.forEach((entry, index) => {
+                const totalDays = Math.floor((new Date(entry.endDate) - new Date(entry.startDate)) / (1000 * 60 * 60 * 24)) + 1;
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${entry.startDate}</td>
+                    <td>${entry.endDate}</td>
+                    <td>${totalDays}</td>
+                    <td>${entry.workDays}</td>
+                    <td>${entry.note}</td>
+                    <td><button class="btn-small btn-danger" onclick="deleteVacation(${index})">Löschen</button></td>
+                `;
+            });
+        }
+
+        function deleteVacation(index) {
+            if (confirm('Urlaub wirklich löschen?')) {
+                data.vacationEntries.splice(index, 1);
+                updateVacationDisplay();
+            }
+        }
+
+        // Krankheit Funktionen
+        function addSickDay() {
+            const startDate = document.getElementById('sickStart').value;
+            const endDate = document.getElementById('sickEnd').value;
+            const note = document.getElementById('sickNote').value;
+
+            if (!startDate || !endDate) {
+                alert('Bitte wählen Sie Start- und Enddatum');
+                return;
+            }
+
+            const workDays = calculateWorkDays(startDate, endDate);
+
+            data.sickEntries.push({
+                startDate: startDate,
+                endDate: endDate,
+                note: note || '-',
+                workDays: workDays
+            });
+
+            document.getElementById('sickStart').value = getCurrentTime();
+            document.getElementById('sickEnd').value = getCurrentTime();
+            document.getElementById('sickNote').value = '';
+
+            updateSickDisplay();
+        }
+
+        function updateSickDisplay() {
+            const totalSickDays = data.sickEntries.reduce((sum, entry) => sum + entry.workDays, 0);
+            document.getElementById('totalSickDays').textContent = totalSickDays;
+
+            const tbody = document.getElementById('sickBody');
+            tbody.innerHTML = '';
+
+            data.sickEntries.forEach((entry, index) => {
+                const totalDays = Math.floor((new Date(entry.endDate) - new Date(entry.startDate)) / (1000 * 60 * 60 * 24)) + 1;
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${entry.startDate}</td>
+                    <td>${entry.endDate}</td>
+                    <td>${totalDays}</td>
+                    <td>${entry.workDays}</td>
+                    <td>${entry.note}</td>
+                    <td><button class="btn-small btn-danger" onclick="deleteSick(${index})">Löschen</button></td>
+                `;
+            });
+        }
+
+        function deleteSick(index) {
+            if (confirm('Krankheitstag wirklich löschen?')) {
+                data.sickEntries.splice(index, 1);
+                updateSickDisplay();
+            }
+        }
+
+        // Monatsübersicht
+        function updateMonthlyOverview() {
+            const month = parseInt(document.getElementById('monthSelect').value);
+            const year = 2026;
+
+            let targetHours = 0;
+            let actualHours = 0;
+            let vacationHours = 0;
+            let sickHours = 0;
+
+            const tbody = document.getElementById('monthlyBody');
+            tbody.innerHTML = '';
+
+            const firstDay = new Date(year, month - 1, 1);
+            const lastDay = new Date(year, month, 0);
+
+            for (let day = 1; day <= lastDay.getDate(); day++) {
+                const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const date = new Date(dateStr + 'T00:00:00');
+                const weekday = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'][date.getDay()];
+
+                let status = '';
+                let dayWork = 0;
+                let dayVacation = false;
+                let daySick = false;
+
+                // Prüfe Arbeitszeiten
+                data.workEntries.forEach(entry => {
+                    if (entry.date === dateStr) {
+                        const startHours = timeToHours(entry.startTime);
+                        const endHours = timeToHours(entry.endTime);
+                        dayWork += endHours - startHours;
+                    }
+                });
+
+                // Prüfe Pausen und subtrahiere
+                data.pauseEntries.forEach(entry => {
+                    if (entry.date === dateStr) {
+                        const startHours = timeToHours(entry.startTime);
+                        const endHours = timeToHours(entry.endTime);
+                        dayWork -= (endHours - startHours);
+                    }
+                });
+
+                // Prüfe Urlaub
+                data.vacationEntries.forEach(entry => {
+                    const start = new Date(entry.startDate + 'T00:00:00');
+                    const end = new Date(entry.endDate + 'T00:00:00');
+                    if (date >= start && date <= end) {
+                        dayVacation = true;
+                        if (isWeekday(dateStr) && !isHoliday(dateStr)) {
+                            vacationHours += 8;
+                        }
+                    }
+                });
+
+                // Prüfe Krankheit
+                data.sickEntries.forEach(entry => {
+                    const start = new Date(entry.startDate + 'T00:00:00');
+                    const end = new Date(entry.endDate + 'T00:00:00');
+                    if (date >= start && date <= end) {
+                        daySick = true;
+                        if (isWeekday(dateStr) && !isHoliday(dateStr)) {
+                            sickHours += 8;
+                        }
+                    }
+                });
+
+                if (isWeekday(dateStr) && !isHoliday(dateStr)) {
+                    targetHours += 8;
+                    actualHours += dayWork;
+                }
+
+                let statusBadge = '';
+                if (isHoliday(dateStr)) {
+                    statusBadge = '<span class="status-badge" style="background-color: rgba(107, 114, 128, 0.1); color: #374151;">Feiertag</span>';
+                } else if (date.getDay() === 0 || date.getDay() === 6) {
+                    statusBadge = '<span class="status-badge" style="background-color: rgba(107, 114, 128, 0.1); color: #374151;">Wochenende</span>';
+                } else if (dayVacation) {
+                    statusBadge = '<span class="status-badge status-vacation">🏖️ Urlaub</span>';
+                } else if (daySick) {
+                    statusBadge = '<span class="status-badge status-sick">🏥 Krank</span>';
+                } else if (dayWork > 0) {
+                    statusBadge = '<span class="status-badge status-active">✓ Gearbeitet</span>';
+                } else {
+                    statusBadge = '<span class="status-badge" style="background-color: rgba(239, 68, 68, 0.1); color: #dc2626;">❌ Fehltag</span>';
+                }
+
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${dateStr}</td>
+                    <td>${weekday}</td>
+                    <td>${dayWork > 0 ? hoursToTime(dayWork) : '-'}</td>
+                    <td>${dayVacation ? 'Ja' : 'Nein'}</td>
+                    <td>${daySick ? 'Ja' : 'Nein'}</td>
+                    <td>${statusBadge}</td>
+                `;
+            }
+
+            const overtime = actualHours - targetHours;
+
+            document.getElementById('targetHours').textContent = hoursToTime(targetHours);
+            document.getElementById('actualHours').textContent = hoursToTime(actualHours);
+            document.getElementById('overtimeHours').textContent = hoursToTime(Math.max(0, overtime));
+            document.getElementById('missingHours').textContent = hoursToTime(Math.max(0, -overtime));
+
+            // Jahresübersicht aktualisieren
+            let totalActualHours = 0;
+            data.workEntries.forEach(entry => {
+                const startHours = timeToHours(entry.startTime);
+                const endHours = timeToHours(entry.endTime);
+                totalActualHours += endHours - startHours;
+            });
+
+            data.pauseEntries.forEach(entry => {
+                const startHours = timeToHours(entry.startTime);
+                const endHours = timeToHours(entry.endTime);
+                totalActualHours -= (endHours - startHours);
+            });
+
+            const totalSickDays = data.sickEntries.reduce((sum, entry) => sum + entry.workDays, 0);
+            document.getElementById('totalActualHours').textContent = hoursToTime(totalActualHours);
+            document.getElementById('totalOvertime').textContent = hoursToTime(totalActualHours - 2016);
+            document.getElementById('totalUsedVacation').textContent = getTotalUsedVacationDays();
+            document.getElementById('totalSickDaysYear').textContent = totalSickDays;
+        }
+
+        // Initialisierung
+        updateWorkDisplay();
+        updateVacationDisplay();
+        updateSickDisplay();
+        document.getElementById('monthSelect').value = '1';
+    </script>
+</body>
+</html>
